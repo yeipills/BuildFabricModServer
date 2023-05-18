@@ -6,7 +6,7 @@ Este README te ayudará a añadir mods a tu servidor de Minecraft utilizando Fab
 
 - [Java 8](https://www.oracle.com/java/technologies/javase-jdk8-downloads.html) o una versión superior.
 - [Minecraft Server](https://www.minecraft.net/es-es/download/server) con la versión que corresponda con el Mod Loader Fabric.
-- [Fabric Mod Loader](https://fabricmc.net/use/)
+- [Fabric Mod Loader](https://fabricmc.net/use/) usa la versión que corresponda.
 
 ## Pasos
 
