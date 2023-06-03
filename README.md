@@ -4,11 +4,42 @@ Este README te ayudará a añadir mods a tu servidor de Minecraft utilizando Fab
 
 ## Requisitos Previos
 
-- [Java Development Kit (JDK) 17]
+- Java Development Kit (JDK) 17 (Los pasos estan mas abajo)
 - [Minecraft Server](https://www.minecraft.net/es-es/download/server) con la versión que corresponda con el Mod Loader Fabric.
 - [Fabric Mod Loader](https://fabricmc.net/use/)
 - [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
 - Un sistema Debian 11 ARM con al menos 2 núcleos y 2GB de RAM.
+
+## Para instalar OpenJDK 17 en Debian, puedes seguir estos pasos:
+
+1. Actualiza el sistema: Antes de instalar cualquier paquete, siempre es recomendable actualizar el sistema. Puedes hacerlo con el siguiente comando:
+
+```bash
+sudo apt update
+sudo apt upgrade
+```
+
+2. Instala OpenJDK 17: Después de actualizar el sistema, puedes instalar OpenJDK 17 con el siguiente comando:
+
+```bash
+sudo apt install openjdk-17-jdk
+```
+
+3. Verifica la instalación: Una vez que la instalación esté completa, puedes verificar que OpenJDK 17 se instaló correctamente con el siguiente comando:
+
+```bash
+java -version
+```
+
+Deberías ver algo como esto:
+
+```bash
+openjdk version "17.0.0" 2023-06-03
+OpenJDK Runtime Environment (build 17.0.0+35-Debian-1)
+OpenJDK 64-Bit Server VM (build 17.0.0+35-Debian-1, mixed mode, sharing)
+```
+
+Esto indica que OpenJDK 17 está instalado correctamente en tu sistema.
 
 ## Pasos para Linux (Debian 11 ARM)
 
