@@ -4,7 +4,7 @@ Este README te ayudará a añadir mods a tu servidor de Minecraft utilizando Fab
 
 ## Requisitos Previos
 
-- Java Development Kit (JDK) 17 (Los pasos estan mas abajo)
+- Java Development Kit (JDK) 17
 - [Fabric Mod Loader](https://fabricmc.net/use/server/)
 - [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
 - Un sistema Debian 11 ARM con al menos 2 núcleos y 2GB de RAM.
