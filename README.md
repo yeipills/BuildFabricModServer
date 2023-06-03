@@ -4,34 +4,29 @@ Este README te ayudará a añadir mods a tu servidor de Minecraft utilizando Fab
 
 ## Requisitos Previos
 
-- [Java 8](https://www.oracle.com/java/technologies/javase-jdk8-downloads.html) o una versión superior.
+- [Java Development Kit (JDK) 17](https://jdk.java.net/17/)
 - [Minecraft Server](https://www.minecraft.net/es-es/download/server) con la versión que corresponda con el Mod Loader Fabric.
 - [Fabric Mod Loader](https://fabricmc.net/use/)
 - [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api)
+- Un sistema Debian 11 ARM con al menos 2 núcleos y 2GB de RAM.
 
-## Pasos para Windows 10
-
-1. Descargar la versión de [Fabric Installer](https://fabricmc.net/use/) adecuada para el servidor.
-2. Ejecuta el instalador de Fabric. Selecciona la opción 'Server' y luego especifica la ubicación donde deseas que se instale el servidor de Fabric. Haz clic en 'Install' para iniciar la instalación.
-3. Descarga la [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api) y mueve el archivo .jar a la carpeta 'mods' que se creó en el paso anterior.
-4. Mueve también los mods que deseas instalar en tu servidor a la carpeta 'mods'. Si no puedes encontrar la carpeta 'mods', puedes crearla tú mismo en el directorio del servidor.
-5. Una vez que hayas movido todos los mods y la Fabric API a la carpeta 'mods', ejecuta el servidor utilizando el archivo .jar de Fabric que se creó durante la instalación. Haz clic derecho en el archivo .jar y selecciona "Abrir con Java(TM) Platform SE binary". Asegúrate de tener la cantidad adecuada de RAM asignada a tu servidor.
-6. Verifica que todos los mods se carguen correctamente en el arranque del servidor. Si hay algún problema con los mods, el servidor proporcionará un error en el registro de la consola.
-
-## Pasos para Linux
+## Pasos para Linux (Debian 11 ARM)
 
 1. Descarga la versión de [Fabric Installer](https://fabricmc.net/use/) adecuada para el servidor.
+
 2. Ejecuta el instalador de Fabric con el comando `java -jar fabric-installer.jar --installServer`. Asegúrate de estar en el directorio donde deseas que se instale el servidor de Fabric.
+
 3. Descarga la [Fabric API](https://www.curseforge.com/minecraft/mc-mods/fabric-api) y mueve el archivo .jar a la carpeta 'mods' que se creó en el paso anterior.
+
 4. Mueve también los mods que deseas instalar en tu servidor a la carpeta 'mods'. Si no puedes encontrar la carpeta 'mods', puedes crearla tú mismo en el directorio del servidor con `mkdir mods`.
-5. Una vez que hayas movido todos los mods y la Fabric API a la carpeta 'mods', inicia el servidor utilizando el archivo .jar de Fabric que se creó durante la instalación con el comando `java -Xmx1024M -Xms1024M -jar fabric-server-launch.jar nogui`. Asegúrate de tener la cantidad adecuada de RAM asignada a tu servidor.
+
+5. Una vez que hayas movido todos los mods y la Fabric API a la carpeta 'mods', inicia el servidor utilizando el archivo .jar de Fabric que se creó durante la instalación con el comando `java -Xmx2G -Xms2G -jar fabric-server-launch.jar nogui`. Asegúrate de tener la cantidad adecuada de RAM asignada a tu servidor.
+
 6. Verifica que todos los mods se carguen correctamente en el arranque del servidor. Si hay algún problema con los mods, el servidor proporcionará un error en el registro de la consola.
 
-## Scripts útiles
+## Optimización del Servidor
 
-### Optimización del Sistema
-
-Aquí tienes un script para Linux que te ayuda a optimizar tu sistema para correr un servidor de Minecraft:
+A continuación, te presentamos un script para optimizar tu servidor de Minecraft. Este script actualiza tu sistema, instala sysstat para el monitoreo del rendimiento, configura el kernel para manejar mejor la carga de la red, y reduce el uso de SWAP para mejorar el rendimiento general.
 
 ```bash
 #!/bin/bash
@@ -55,6 +50,8 @@ echo "vm.vfs_cache_pressure=50" | sudo tee -a /etc/sysctl.conf
 echo "Optimizando la gestión de la red..."
 echo "net.core.rmem_max=12582912" | sudo tee -a /etc/sysctl.conf
 echo "net.core.wmem_max=12582912" | sudo tee -a /etc/sysctl.conf
+
+
 echo "net.ipv4.tcp_rmem=4096 87380 12582912" | sudo tee -a /etc/sysctl.conf
 echo "net.ipv4.tcp_wmem=4096 87380 12582912" | sudo tee -a /etc/sysctl.conf
 echo "net.ipv4.tcp_congestion_control=cubic" | sudo tee -a /etc/sysctl.conf
@@ -69,9 +66,8 @@ sudo sysctl -p
 
 echo "¡Optimización completada!"
 ```
-### Inicio del Servidor
 
-Este script te ayuda a iniciar tu servidor de Minecraft con las opciones de JVM recomendadas:
+## Además, este es un script para iniciar tu servidor de Minecraft con opciones de JVM personalizadas para un rendimiento óptimo.
 
 ```bash
 #!/bin/bash
@@ -91,14 +87,11 @@ SERVER_ARGS="nogui"
 # Inicia el servidor
 exec java $JAVA_OPTS -jar "$SERVER_JAR" $SERVER_ARGS
 ```
-## Recuerda iniciar este script desde el directorio donde se encuentra el ejecutable del servidor de Minecraft.
-### Notas
+
+Por favor, recuerda ejecutar este último script desde dentro del directorio del servidor, o donde quiera que se encuentre el ejecutable del servidor de Minecraft.
+
+## Notas
 
 - Todos los mods que se instalen en el servidor deben ser compatibles con Fabric.
-- Todos los jugadores necesitarán tener los mismos mods (y las mismas versiones de estos mods) instalados en sus propios clientes de Minecraft para poder unirse al   servidor.
+- Todos los jugadores necesitarán tener los mismos mods (y las mismas versiones de estos mods) instalados en sus propios clientes de Minecraft para poder unirse al servidor.
 - Asegúrate de que estás utilizando la versión correcta de Java para tu servidor. Algunos mods pueden requerir versiones específicas de Java.
-
-
-
-
-
