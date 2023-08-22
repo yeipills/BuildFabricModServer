@@ -1,4 +1,4 @@
-# Añadiendo mods a un servidor de Minecraft usando Fabric ModLoader
+# Añadiendo mods a un servidor de Minecraft ARM usando Fabric ModLoader
 
 Este README te ayudará a añadir mods a tu servidor de Minecraft utilizando Fabric, un popular mod loader.
 
