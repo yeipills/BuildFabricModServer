@@ -1,0 +1,209 @@
+name: ✨ Feature Request
+description: Solicitar una nueva característica o mejora
+title: "[FEATURE] "
+labels: ["enhancement", "feature-request"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ✨ ¡Gracias por sugerir una mejora!
+        
+        Tus ideas son valiosas para mejorar este proyecto. Por favor describe tu propuesta detalladamente.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist Previo
+      description: Confirma que has revisado lo siguiente
+      options:
+        - label: He buscado en issues existentes para verificar que esta característica no haya sido solicitada
+          required: true
+        - label: He revisado la documentación para confirmar que esta funcionalidad no existe
+          required: true
+        - label: Esta solicitud está relacionada con BuildFabricModServer
+          required: true
+
+  - type: dropdown
+    id: feature-type
+    attributes:
+      label: 🏷️ Tipo de Característica
+      description: ¿Qué tipo de mejora estás solicitando?
+      options:
+        - Nueva funcionalidad
+        - Mejora de rendimiento
+        - Mejora de documentación
+        - Mejora de la experiencia de usuario
+        - Compatibilidad/Soporte adicional
+        - Automatización/Scripts
+        - Configuración/Personalización
+        - Monitoreo/Logging
+        - Seguridad
+        - Otro (especificar en descripción)
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem-summary
+    attributes:
+      label: 🎯 Resumen del Problema
+      description: ¿Qué problema resolvería esta característica?
+      placeholder: "Actualmente es difícil/imposible hacer X porque..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: 💡 Solución Propuesta
+      description: Describe detalladamente cómo te gustaría que funcione esta característica
+      placeholder: |
+        Me gustaría que se agregue...
+        
+        Debería funcionar de la siguiente manera:
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-cases
+    attributes:
+      label: 🎮 Casos de Uso
+      description: ¿En qué situaciones sería útil esta característica?
+      placeholder: |
+        - Para administradores que necesitan...
+        - Para usuarios que quieren...
+        - Para automatizar...
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: ✅ Beneficios Esperados
+      description: ¿Qué beneficios traería esta característica?
+      placeholder: |
+        - Mejoraría el rendimiento en...
+        - Facilitaría la tarea de...
+        - Reduciría el tiempo necesario para...
+        - Aumentaría la seguridad al...
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: ⚡ Prioridad Sugerida
+      description: ¿Qué tan importante consideras esta característica?
+      options:
+        - Baja - Sería bueno tenerla
+        - Media - Mejoraría significativamente la experiencia
+        - Alta - Es muy necesaria para el flujo de trabajo
+        - Crítica - Bloquea funcionalidad importante
+    validations:
+      required: true
+
+  - type: dropdown
+    id: complexity
+    attributes:
+      label: 🔧 Complejidad Estimada
+      description: ¿Qué tan compleja crees que sería implementar esto?
+      options:
+        - Simple - Cambio menor o configuración
+        - Moderada - Requiere algo de desarrollo
+        - Compleja - Requiere cambios significativos
+        - No estoy seguro
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: components
+    attributes:
+      label: 📦 Componentes Afectados
+      description: ¿Qué partes del proyecto se verían afectadas?
+      options:
+        - label: Scripts de instalación
+        - label: Scripts de optimización
+        - label: Iniciador del servidor
+        - label: Configuraciones
+        - label: Docker/Containerización
+        - label: Documentación
+        - label: Monitoreo/Benchmarking
+        - label: Backups/Updates
+        - label: Seguridad
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 🔄 Alternativas Consideradas
+      description: ¿Has considerado otras formas de resolver este problema?
+      placeholder: |
+        También pensé en...
+        Otra opción sería...
+        Como workaround temporal se podría...
+    validations:
+      required: false
+
+  - type: textarea
+    id: implementation-ideas
+    attributes:
+      label: 🛠️ Ideas de Implementación
+      description: Si tienes ideas técnicas sobre cómo implementar esto, compártelas
+      placeholder: |
+        Se podría implementar mediante...
+        Sería necesario modificar...
+        Una posible estructura sería...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📌 Contexto Adicional
+      description: Cualquier otra información relevante
+      placeholder: |
+        - Enlaces a documentación relevante
+        - Ejemplos de implementaciones similares
+        - Screenshots o mockups
+        - Consideraciones especiales
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 🤝 Contribución
+      description: ¿Estarías interesado en ayudar con la implementación?
+      options:
+        - label: Puedo ayudar con el diseño/especificación
+        - label: Puedo ayudar con la implementación
+        - label: Puedo ayudar con testing
+        - label: Puedo ayudar con documentación
+        - label: Solo puedo reportar/solicitar la característica
+
+  - type: checkboxes
+    id: compatibility
+    attributes:
+      label: 🔗 Compatibilidad
+      description: Consideraciones de compatibilidad
+      options:
+        - label: Esta característica debe ser compatible con instalaciones existentes
+        - label: Esta característica puede requerir migración/reconfiguración
+        - label: Esta característica es específica para cierta arquitectura (ARM/x86)
+        - label: Esta característica requiere versiones específicas de software
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 📋 Confirmación Final
+      description: Confirma lo siguiente
+      options:
+        - label: He proporcionado información clara y detallada sobre la característica solicitada
+          required: true
+        - label: Entiendo que no todas las solicitudes pueden ser implementadas
+          required: true
+        - label: Estoy dispuesto a proporcionar clarificaciones adicionales si es necesario
+          required: true

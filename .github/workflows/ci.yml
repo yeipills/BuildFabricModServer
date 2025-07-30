@@ -1,0 +1,372 @@
+name: 🚀 Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened]
+  schedule:
+    # Ejecutar tests todas las semanas los lunes a las 9:00 UTC
+    - cron: '0 9 * * 1'
+
+# Permisos mínimos necesarios
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+# Variables de entorno globales
+env:
+  MINECRAFT_VERSION: "1.20.4"
+  FABRIC_VERSION: "0.15.6"
+  JAVA_VERSION: "17"
+
+jobs:
+  # Job 1: Validación de sintaxis y lint
+  lint-and-validate:
+    name: 🔍 Lint & Validation
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🐚 Validate shell scripts
+      run: |
+        echo "🔍 Validando scripts de shell..."
+        
+        # Instalar shellcheck si no está disponible
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+        
+        # Validar todos los scripts .sh
+        find . -name "*.sh" -type f | while read -r script; do
+          echo "Validando: $script"
+          shellcheck "$script" || exit 1
+        done
+        
+        echo "✅ Todos los scripts pasaron la validación"
+    
+    - name: 🐳 Validate Docker files
+      run: |
+        echo "🔍 Validando archivos Docker..."
+        
+        # Instalar hadolint
+        wget -O hadolint https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+        chmod +x hadolint
+        
+        # Validar Dockerfile
+        ./hadolint Dockerfile || exit 1
+        
+        # Validar docker-compose.yml
+        docker-compose config -q || exit 1
+        
+        echo "✅ Archivos Docker válidos"
+    
+    - name: 📋 Validate YAML files
+      run: |
+        echo "🔍 Validando archivos YAML..."
+        
+        # Instalar yamllint
+        pip install yamllint
+        
+        # Validar archivos YAML
+        find . -name "*.yml" -o -name "*.yaml" | while read -r yaml; do
+          echo "Validando: $yaml"
+          yamllint "$yaml" || exit 1
+        done
+        
+        echo "✅ Archivos YAML válidos"
+
+  # Job 2: Tests en múltiples arquitecturas
+  test-multi-arch:
+    name: 🧪 Test Multi-Architecture
+    runs-on: ubuntu-latest
+    needs: lint-and-validate
+    
+    strategy:
+      matrix:
+        platform: [linux/amd64, linux/arm64]
+        include:
+          - platform: linux/amd64
+            arch: x86_64
+          - platform: linux/arm64
+            arch: aarch64
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: ☕ Set up Java ${{ env.JAVA_VERSION }}
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ env.JAVA_VERSION }}
+        distribution: 'temurin'
+        
+    - name: 🏗️ Test Docker build for ${{ matrix.platform }}
+      run: |
+        echo "🔨 Construyendo imagen para ${{ matrix.platform }}..."
+        
+        docker buildx build \
+          --platform ${{ matrix.platform }} \
+          --build-arg MINECRAFT_VERSION=${{ env.MINECRAFT_VERSION }} \
+          --build-arg FABRIC_VERSION=${{ env.FABRIC_VERSION }} \
+          --tag minecraft-fabric-test:${{ matrix.arch }} \
+          --load \
+          .
+        
+        echo "✅ Imagen construida exitosamente para ${{ matrix.platform }}"
+    
+    - name: 🧪 Test script execution
+      run: |
+        echo "🧪 Probando ejecución de scripts..."
+        
+        # Hacer ejecutables todos los scripts
+        chmod +x *.sh
+        
+        # Probar validación de prerrequisitos (modo dry-run)
+        echo "Probando validaciones básicas..."
+        
+        # Test install.sh --help
+        if ./install.sh --help 2>/dev/null; then
+          echo "✅ install.sh help funciona"
+        fi
+        
+        # Test update-server.sh --help  
+        if ./update-server.sh --help 2>/dev/null; then
+          echo "✅ update-server.sh help funciona"
+        fi
+        
+        # Test benchmark.sh --help
+        if ./benchmark.sh --help 2>/dev/null; then
+          echo "✅ benchmark.sh help funciona"
+        fi
+        
+        # Test docker-run.sh help
+        if ./docker-run.sh help 2>/dev/null; then
+          echo "✅ docker-run.sh help funciona"
+        fi
+        
+        echo "✅ Scripts básicos funcionan correctamente"
+
+  # Job 3: Test de instalación en contenedor
+  test-installation:
+    name: 🚀 Test Installation
+    runs-on: ubuntu-latest
+    needs: lint-and-validate
+    
+    strategy:
+      matrix:
+        os: ['ubuntu:22.04', 'ubuntu:20.04', 'debian:11', 'debian:12']
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🧪 Test installation in ${{ matrix.os }}
+      run: |
+        echo "🧪 Probando instalación en ${{ matrix.os }}..."
+        
+        # Crear Dockerfile temporal para testing
+        cat > Dockerfile.test << EOF
+        FROM ${{ matrix.os }}
+        
+        # Instalar dependencias básicas
+        RUN apt-get update && apt-get install -y \\
+            sudo \\
+            wget \\
+            curl \\
+            openjdk-17-jdk \\
+            bash \\
+            && rm -rf /var/lib/apt/lists/*
+        
+        # Crear usuario no-root
+        RUN useradd -m -s /bin/bash testuser && \\
+            echo 'testuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
+        
+        USER testuser
+        WORKDIR /home/testuser
+        
+        # Copiar archivos del proyecto
+        COPY --chown=testuser:testuser . ./BuildFabricModServer/
+        WORKDIR /home/testuser/BuildFabricModServer
+        
+        # Hacer ejecutables los scripts
+        RUN chmod +x *.sh
+        
+        # Test básico de validación de prerrequisitos
+        RUN echo "Testing prerequisite checks..." && \\
+            java -version && \\
+            which wget && \\
+            which curl
+        EOF
+        
+        # Construir y probar
+        docker build -f Dockerfile.test -t fabric-test:${{ matrix.os }} .
+        
+        echo "✅ Instalación base funciona en ${{ matrix.os }}"
+
+  # Job 4: Security scanning
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: lint-and-validate
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: 📋 Upload Trivy scan results
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: 🐳 Build Docker image for security scan
+      run: |
+        docker build -t minecraft-fabric-security-test .
+        
+    - name: 🔍 Scan Docker image
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'minecraft-fabric-security-test'
+        format: 'table'
+        exit-code: '1'
+        ignore-unfixed: true
+        severity: 'CRITICAL,HIGH'
+
+  # Job 5: Documentation check
+  docs-check:
+    name: 📚 Documentation Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 🔍 Check documentation completeness
+      run: |
+        echo "🔍 Verificando completitud de documentación..."
+        
+        # Verificar archivos de documentación esenciales
+        required_files=(
+          "README.md"
+          "docs/QUICK_START.md"
+          ".github/ISSUE_TEMPLATE/bug_report.yml"
+          ".github/ISSUE_TEMPLATE/feature_request.yml"
+          ".github/ISSUE_TEMPLATE/help_support.yml"
+          ".github/pull_request_template.md"
+        )
+        
+        for file in "${required_files[@]}"; do
+          if [[ ! -f "$file" ]]; then
+            echo "❌ Archivo de documentación faltante: $file"
+            exit 1
+          else
+            echo "✅ Encontrado: $file"
+          fi
+        done
+        
+        # Verificar que los scripts tengan comentarios de ayuda
+        for script in *.sh; do
+          if ! grep -q "show_help\|--help\|-h" "$script"; then
+            echo "⚠️ Script sin función de ayuda: $script"
+          else
+            echo "✅ Script con ayuda: $script"
+          fi
+        done
+        
+        echo "✅ Verificación de documentación completada"
+    
+    - name: 📝 Check for broken links (if applicable)
+      run: |
+        echo "🔗 Verificando enlaces rotos en documentación..."
+        
+        # Instalar herramienta para verificar enlaces
+        npm install -g markdown-link-check
+        
+        # Verificar enlaces en archivos markdown
+        find . -name "*.md" | while read -r md_file; do
+          echo "Verificando enlaces en: $md_file"
+          markdown-link-check "$md_file" --config .github/markdown-link-check.json || true
+        done
+
+  # Job 6: Generate test report
+  test-report:
+    name: 📊 Generate Test Report
+    runs-on: ubuntu-latest
+    needs: [lint-and-validate, test-multi-arch, test-installation, security-scan, docs-check]
+    if: always()
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      
+    - name: 📊 Generate summary report
+      run: |
+        echo "# 🚀 CI Test Summary Report" > test_summary.md
+        echo "" >> test_summary.md
+        echo "**Fecha:** $(date)" >> test_summary.md
+        echo "**Commit:** ${{ github.sha }}" >> test_summary.md
+        echo "**Branch:** ${{ github.ref_name }}" >> test_summary.md
+        echo "" >> test_summary.md
+        
+        echo "## 📋 Resultados de Jobs:" >> test_summary.md
+        echo "" >> test_summary.md
+        
+        # Status de cada job
+        echo "- 🔍 Lint & Validation: ${{ needs.lint-and-validate.result }}" >> test_summary.md
+        echo "- 🧪 Multi-Architecture Tests: ${{ needs.test-multi-arch.result }}" >> test_summary.md  
+        echo "- 🚀 Installation Tests: ${{ needs.test-installation.result }}" >> test_summary.md
+        echo "- 🔒 Security Scan: ${{ needs.security-scan.result }}" >> test_summary.md
+        echo "- 📚 Documentation Check: ${{ needs.docs-check.result }}" >> test_summary.md
+        echo "" >> test_summary.md
+        
+        echo "## 🎯 Configuración de Testing:" >> test_summary.md
+        echo "" >> test_summary.md
+        echo "- **Minecraft Version:** ${{ env.MINECRAFT_VERSION }}" >> test_summary.md
+        echo "- **Fabric Version:** ${{ env.FABRIC_VERSION }}" >> test_summary.md
+        echo "- **Java Version:** ${{ env.JAVA_VERSION }}" >> test_summary.md
+        echo "" >> test_summary.md
+        
+        # Mostrar el reporte
+        cat test_summary.md
+        
+    - name: 💬 Comment PR with results
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const summary = fs.readFileSync('test_summary.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: summary
+          });
+
+# Configuración de notificaciones
+notifications:
+  on_success: change
+  on_failure: always

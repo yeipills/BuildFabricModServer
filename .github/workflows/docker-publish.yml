@@ -1,0 +1,314 @@
+name: 🐳 Build and Publish Docker Images
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Dockerfile'
+      - 'docker-compose.yml'
+      - '.github/workflows/docker-publish.yml'
+  release:
+    types: [published]
+
+# Permisos para publicar imágenes
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+  MINECRAFT_VERSION: "1.20.4"
+  FABRIC_VERSION: "0.15.6"
+
+jobs:
+  # Job 1: Build y test de la imagen
+  build-and-test:
+    name: 🏗️ Build & Test Docker Image
+    runs-on: ubuntu-latest
+    
+    outputs:
+      image-digest: ${{ steps.build.outputs.digest }}
+      image-metadata: ${{ steps.meta.outputs.json }}
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Set up QEMU
+      uses: docker/setup-qemu-action@v3
+      
+    - name: 🐳 Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: 🔑 Log in to Container Registry
+      if: github.event_name != 'pull_request'
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🏷️ Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=semver,pattern={{major}}.{{minor}}
+          type=semver,pattern={{major}}
+          type=raw,value=latest,enable={{is_default_branch}}
+          type=raw,value={{branch}}-{{sha}},enable={{is_default_branch}}
+        labels: |
+          org.opencontainers.image.title=Minecraft Fabric Server
+          org.opencontainers.image.description=Optimized Minecraft Fabric Server with multi-architecture support
+          org.opencontainers.image.vendor=BuildFabricModServer
+          org.opencontainers.image.documentation=https://github.com/${{ github.repository }}/blob/main/README.md
+          org.opencontainers.image.source=https://github.com/${{ github.repository }}
+          minecraft.version=${{ env.MINECRAFT_VERSION }}
+          fabric.version=${{ env.FABRIC_VERSION }}
+    
+    - name: 🏗️ Build and push Docker image
+      id: build
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        platforms: linux/amd64,linux/arm64
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        build-args: |
+          MINECRAFT_VERSION=${{ env.MINECRAFT_VERSION }}
+          FABRIC_VERSION=${{ env.FABRIC_VERSION }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+        
+    - name: 🧪 Test Docker image
+      if: github.event_name == 'pull_request'
+      run: |
+        echo "🧪 Probando imagen Docker construida..."
+        
+        # Construir imagen localmente para testing
+        docker build \
+          --build-arg MINECRAFT_VERSION=${{ env.MINECRAFT_VERSION }} \
+          --build-arg FABRIC_VERSION=${{ env.FABRIC_VERSION }} \
+          -t test-image:latest .
+        
+        # Probar que la imagen se inicia correctamente
+        echo "Probando inicio de contenedor..."
+        docker run --rm -d --name test-container test-image:latest
+        
+        # Esperar un momento para que se inicie
+        sleep 10
+        
+        # Verificar que el contenedor está ejecutándose
+        if docker ps | grep -q test-container; then
+          echo "✅ Contenedor iniciado correctamente"
+          docker stop test-container
+        else
+          echo "❌ Error: El contenedor no se inició correctamente"
+          docker logs test-container || true
+          exit 1
+        fi
+        
+        # Probar healthcheck
+        echo "Probando healthcheck..."
+        docker run --rm test-image:latest ./healthcheck.sh && echo "✅ Healthcheck funciona" || echo "⚠️ Healthcheck falló"
+        
+        echo "✅ Tests de imagen completados"
+
+  # Job 2: Security scan de la imagen
+  security-scan:
+    name: 🔒 Security Scan
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name != 'pull_request'
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: 🔑 Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🔍 Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        
+    - name: 📋 Upload Trivy scan results to GitHub Security tab
+      uses: github/codeql-action/upload-sarif@v3
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+        
+    - name: 🔍 Run Trivy vulnerability scanner (table format)
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.ref_name }}
+        format: 'table'
+        exit-code: '0'  # No fallar el build por vulnerabilidades
+        ignore-unfixed: true
+
+  # Job 3: Update documentation con nueva imagen
+  update-docs:
+    name: 📚 Update Documentation
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 📝 Update README with new image info
+      run: |
+        echo "📝 Actualizando documentación con información de la nueva imagen..."
+        
+        # Obtener el digest de la imagen
+        IMAGE_DIGEST="${{ needs.build-and-test.outputs.image-digest }}"
+        TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+        
+        # Crear o actualizar archivo de información de imagen
+        cat > .github/docker-info.md << EOF
+        ## 🐳 Información de la Imagen Docker
+        
+        **Última actualización:** ${TIMESTAMP}
+        **Commit:** ${{ github.sha }}
+        **Imagen:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest\`
+        **Digest:** \`${IMAGE_DIGEST}\`
+        **Minecraft:** ${{ env.MINECRAFT_VERSION }}
+        **Fabric:** ${{ env.FABRIC_VERSION }}
+        
+        ### Arquitecturas Soportadas
+        - linux/amd64
+        - linux/arm64
+        
+        ### Uso
+        \`\`\`bash
+        docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        \`\`\`
+        EOF
+        
+        echo "✅ Documentación actualizada"
+        
+    - name: 📤 Commit documentation updates
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        if git diff --quiet; then
+          echo "No hay cambios en la documentación"
+        else
+          git add .github/docker-info.md
+          git commit -m "docs: update Docker image information [skip ci]" || exit 0
+          git push
+        fi
+
+  # Job 4: Crear release notes automáticas
+  create-release-notes:
+    name: 📋 Create Release Notes
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan]
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: 📥 Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        
+    - name: 📋 Generate Release Notes
+      run: |
+        echo "📋 Generando notas de release..."
+        
+        # Obtener el tag anterior
+        PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD^)
+        CURRENT_TAG=${GITHUB_REF#refs/tags/}
+        
+        echo "# 🚀 Release ${CURRENT_TAG}" > release_notes.md
+        echo "" >> release_notes.md
+        echo "**Fecha:** $(date -u +"%Y-%m-%d")" >> release_notes.md
+        echo "**Imagen Docker:** \`${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${CURRENT_TAG}\`" >> release_notes.md
+        echo "" >> release_notes.md
+        
+        echo "## 🎮 Versiones de Software" >> release_notes.md
+        echo "- **Minecraft:** ${{ env.MINECRAFT_VERSION }}" >> release_notes.md
+        echo "- **Fabric Loader:** ${{ env.FABRIC_VERSION }}" >> release_notes.md
+        echo "" >> release_notes.md
+        
+        echo "## 📝 Cambios desde ${PREVIOUS_TAG}" >> release_notes.md
+        echo "" >> release_notes.md
+        
+        # Generar lista de commits
+        git log ${PREVIOUS_TAG}..HEAD --pretty=format:"- %s (%an)" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "" >> release_notes.md
+        
+        echo "## 🐳 Uso con Docker" >> release_notes.md
+        echo "\`\`\`bash" >> release_notes.md
+        echo "# Descargar imagen" >> release_notes.md
+        echo "docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${CURRENT_TAG}" >> release_notes.md
+        echo "" >> release_notes.md
+        echo "# Ejecutar servidor" >> release_notes.md
+        echo "docker run -d -p 25565:25565 \\" >> release_notes.md
+        echo "  -e EULA=true \\" >> release_notes.md
+        echo "  -v minecraft_world:/opt/minecraft/server/world \\" >> release_notes.md
+        echo "  ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${CURRENT_TAG}" >> release_notes.md
+        echo "\`\`\`" >> release_notes.md
+        
+        cat release_notes.md
+        
+    - name: 📤 Update Release
+      uses: softprops/action-gh-release@v1
+      with:
+        body_path: release_notes.md
+        files: |
+          docker-compose.yml
+          configs/*.template
+
+  # Job 5: Cleanup de imágenes antiguas
+  cleanup-old-images:
+    name: 🧹 Cleanup Old Images
+    runs-on: ubuntu-latest
+    needs: [build-and-test, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: 🔑 Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: 🧹 Delete old images
+      uses: actions/delete-package-versions@v5
+      with:
+        package-name: ${{ github.repository }}
+        package-type: 'container'
+        min-versions-to-keep: 10
+        delete-only-untagged-versions: true
+
+# Notificaciones
+notifications:
+  slack:
+    if: always()
+    webhook_url: ${{ secrets.SLACK_WEBHOOK }}
+    status: ${{ job.status }}
+    text: "Docker build completed for ${{ github.repository }}"

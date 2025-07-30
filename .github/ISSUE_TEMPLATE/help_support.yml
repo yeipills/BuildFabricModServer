@@ -1,0 +1,253 @@
+name: ❓ Help & Support
+description: Obtener ayuda con configuración o uso del servidor
+title: "[HELP] "
+labels: ["question", "help wanted", "support"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## ❓ Centro de Ayuda y Soporte
+        
+        ¿Necesitas ayuda configurando o usando tu servidor Minecraft Fabric? ¡Estamos aquí para ayudarte!
+        
+        **Antes de continuar, revisa estos recursos:**
+        - 📚 [Guía de Inicio Rápido](docs/QUICK_START.md)
+        - 📖 [README Principal](README.md)
+        - 🔧 [Wiki del Proyecto](../../wiki)
+        - 🐛 [Issues Cerrados](../../issues?q=is%3Aissue+is%3Aclosed) - Tal vez tu pregunta ya fue respondida
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist Previo
+      description: Confirma que has revisado lo siguiente
+      options:
+        - label: He leído la documentación disponible
+          required: true
+        - label: He buscado en issues existentes por preguntas similares
+          required: true
+        - label: He intentado seguir las guías de solución de problemas
+          required: true
+
+  - type: dropdown
+    id: help-category
+    attributes:
+      label: 🏷️ Categoría de Ayuda
+      description: ¿Con qué necesitas ayuda específicamente?
+      options:
+        - Instalación inicial
+        - Configuración del servidor
+        - Optimización de rendimiento
+        - Gestión de mods
+        - Problemas de conectividad
+        - Docker/Containerización
+        - Backups y actualizaciones
+        - Monitoreo y logging
+        - Solución de errores
+        - Personalización avanzada
+        - Migración de servidor existente
+        - Otro (especificar en descripción)
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: ❓ Tu Pregunta
+      description: Describe claramente qué necesitas saber o hacer
+      placeholder: |
+        Necesito ayuda para...
+        
+        Específicamente, quiero entender cómo...
+        
+        Mi objetivo es...
+    validations:
+      required: true
+
+  - type: textarea
+    id: current-situation
+    attributes:
+      label: 📍 Situación Actual
+      description: ¿Dónde estás ahora en el proceso?
+      placeholder: |
+        Hasta ahora he logrado...
+        
+        Estoy atascado en el paso donde...
+        
+        Los archivos que tengo son...
+    validations:
+      required: true
+
+  - type: textarea
+    id: attempted-solutions
+    attributes:
+      label: 🔄 Lo Que Has Intentado
+      description: ¿Qué has intentado hacer para resolver esto?
+      placeholder: |
+        He intentado:
+        1. ...
+        2. ...
+        3. ...
+        
+        Los resultados fueron...
+    validations:
+      required: false
+
+  - type: dropdown
+    id: experience-level
+    attributes:
+      label: 👤 Nivel de Experiencia
+      description: ¿Cómo describirías tu experiencia técnica?
+      options:
+        - Principiante - Poca experiencia con servidores/Linux
+        - Intermedio - Algo de experiencia con administración de sistemas
+        - Avanzado - Experiencia significativa con servidores
+        - Experto - Muy experimentado, problema técnico específico
+    validations:
+      required: true
+
+  - type: input
+    id: os-info
+    attributes:
+      label: 💻 Sistema Operativo
+      description: "Ejemplo: Ubuntu 22.04, Raspberry Pi OS, Debian 11"
+      placeholder: "Ubuntu 22.04 LTS"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: 🖥️ Arquitectura
+      description: ¿Qué tipo de sistema estás usando?
+      options:
+        - x86_64 (PC/Servidor tradicional)
+        - ARM64 (Raspberry Pi 4, servidores ARM)
+        - ARM (Raspberry Pi 3 o anterior)
+        - No estoy seguro
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: 🛠️ Método de Instalación
+      description: ¿Cómo instalaste o planeas instalar el servidor?
+      options:
+        - Script de instalación automática (install.sh)
+        - Docker con docker-compose
+        - Docker con docker-run.sh
+        - Instalación manual paso a paso
+        - Aún no he instalado
+        - Otro método
+    validations:
+      required: true
+
+  - type: textarea
+    id: system-specs
+    attributes:
+      label: 🔧 Especificaciones del Sistema
+      description: Información sobre tu hardware (si es relevante)
+      placeholder: |
+        - RAM: 4GB
+        - CPU: 4 cores
+        - Almacenamiento: 100GB disponibles
+        - Conexión a internet: Fibra 100Mbps
+        - Jugadores esperados: 5-10
+    validations:
+      required: false
+
+  - type: textarea
+    id: goal
+    attributes:
+      label: 🎯 Objetivo Final
+      description: ¿Qué quieres lograr al final?
+      placeholder: |
+        Mi objetivo es tener un servidor que...
+        
+        Quiero que mis jugadores puedan...
+        
+        Las características más importantes para mí son...
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-logs
+    attributes:
+      label: 📋 Logs o Mensajes de Error
+      description: Si hay errores específicos, pega los logs aquí
+      placeholder: |
+        Si tienes mensajes de error, pégalos aquí:
+        
+        Para obtener logs:
+        - Instalación normal: `sudo journalctl -u minecraft-fabric -n 30`
+        - Docker: `./docker-run.sh logs | tail -30`
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: configuration-files
+    attributes:
+      label: ⚙️ Archivos de Configuración Relevantes
+      description: Si modificaste configuraciones, comparte las partes relevantes
+      placeholder: |
+        Si modificaste server.properties, docker-compose.yml, u otros archivos de configuración,
+        pega las partes relevantes aquí (sin contraseñas o información sensible):
+      render: text
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: urgency
+    attributes:
+      label: ⏰ Urgencia
+      description: ¿Qué tan urgente es esta consulta?
+      options:
+        - label: No es urgente - Tengo tiempo para aprender
+        - label: Moderadamente urgente - Me gustaría resolver esto pronto
+        - label: Urgente - Necesito ayuda rápida
+        - label: Crítico - Tengo jugadores esperando
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📌 Información Adicional
+      description: Cualquier otro contexto que pueda ser útil
+      placeholder: |
+        - Plazos específicos que tienes
+        - Restricciones especiales de tu entorno
+        - Configuraciones únicas de tu red
+        - Experiencia previa con otros servidores Minecraft
+        - Screenshots si son útiles
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: communication
+    attributes:
+      label: 💬 Preferencias de Comunicación
+      description: ¿Cómo prefieres recibir ayuda?
+      options:
+        - label: Respuestas detalladas paso a paso
+        - label: Enlaces a documentación relevante
+        - label: Ejemplos de código/configuración
+        - label: Screenshots o diagramas cuando sea posible
+        - label: Explicaciones técnicas avanzadas están bien
+
+  - type: checkboxes
+    id: follow-up
+    attributes:
+      label: 🔄 Compromiso de Seguimiento
+      description: Confirma tu compromiso para resolver esto
+      options:
+        - label: Actualizaré este issue con mi progreso
+          required: true
+        - label: Probaré las soluciones sugeridas y reportaré resultados
+          required: true
+        - label: Cerraré el issue cuando mi problema esté resuelto
+          required: true
+        - label: Si encuentro la solución por mi cuenta, la compartiré aquí para otros
+          required: false

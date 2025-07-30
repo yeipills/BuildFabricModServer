@@ -1,0 +1,222 @@
+# ============================================================================
+# 🐳 Docker Compose para Minecraft Fabric Server
+# Versión: 3.8
+# Propósito: Orquestación completa del servidor con servicios auxiliares
+# ============================================================================
+
+version: '3.8'
+
+services:
+  # === SERVIDOR MINECRAFT FABRIC ===
+  minecraft-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MINECRAFT_VERSION: "1.20.4"
+        FABRIC_VERSION: "0.15.6"
+        FABRIC_INSTALLER_VERSION: "0.11.2"
+    container_name: minecraft-fabric-server
+    hostname: minecraft-server
+    restart: unless-stopped
+    
+    # Variables de entorno
+    environment:
+      # Configuración del servidor
+      - EULA=false  # Cambiar a true para aceptar EULA automáticamente
+      - SERVER_PORT=25565
+      - MAX_PLAYERS=20
+      - DIFFICULTY=normal
+      - GAMEMODE=survival
+      - LEVEL_NAME=world
+      - MOTD=§6¡Servidor Fabric con Docker!§r
+      
+      # Configuración Java (ajustar según RAM disponible)
+      - JAVA_OPTS=-Xmx2G -Xms2G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -XX:+UnlockExperimentalVMOptions -XX:+DisableExplicitGC -XX:+AlwaysPreTouch -XX:G1NewSizePercent=30 -XX:G1MaxNewSizePercent=40 -XX:G1HeapRegionSize=8M -XX:G1ReservePercent=20 -XX:G1HeapWastePercent=5 -XX:G1MixedGCCountTarget=4 -XX:InitiatingHeapOccupancyPercent=15 -XX:G1MixedGCLiveThresholdPercent=90 -XX:G1RSetUpdatingPauseTimePercent=5 -XX:SurvivorRatio=32 -XX:+PerfDisableSharedMem -XX:MaxTenuringThreshold=1
+      
+      # Configuración de zona horaria
+      - TZ=America/Mexico_City
+    
+    # Puertos expuestos
+    ports:
+      - "25565:25565"  # Puerto principal del servidor
+      - "25575:25575"  # Puerto RCON (opcional)
+    
+    # Volúmenes para persistencia
+    volumes:
+      # Mundo del servidor (persistente)
+      - minecraft_world:/opt/minecraft/server/world
+      
+      # Mods (persistente para actualizaciones manuales)
+      - minecraft_mods:/opt/minecraft/server/mods
+      
+      # Backups automáticos
+      - minecraft_backups:/opt/minecraft/backups
+      
+      # Configuración del servidor (persistente)
+      - minecraft_config:/opt/minecraft/server/config
+      
+      # Logs del servidor
+      - minecraft_logs:/opt/minecraft/server/logs
+      
+      # Archivo de configuración (opcional - para personalización avanzada)
+      # - ./server.properties:/opt/minecraft/server/server.properties:ro
+      
+      # Whitelist y ops (opcional)
+      # - ./whitelist.json:/opt/minecraft/server/whitelist.json
+      # - ./ops.json:/opt/minecraft/server/ops.json
+    
+    # Configuración de recursos
+    deploy:
+      resources:
+        limits:
+          memory: 3G      # Límite de memoria (ajustar según necesidades)
+          cpus: '2.0'     # Límite de CPU (ajustar según cores disponibles)
+        reservations:
+          memory: 1G      # Memoria reservada mínima
+          cpus: '0.5'     # CPU reservada mínima
+    
+    # Política de reinicio
+    restart: unless-stopped
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "./healthcheck.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Redes
+    networks:
+      - minecraft-network
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Dependencias (servicios que deben iniciarse antes)
+    depends_on:
+      - minecraft-backup
+
+  # === SERVICIO DE BACKUP AUTOMÁTICO ===
+  minecraft-backup:
+    image: alpine:latest
+    container_name: minecraft-backup-service
+    restart: unless-stopped
+    
+    environment:
+      - TZ=America/Mexico_City
+      - BACKUP_INTERVAL=24h    # Intervalo de backup (24h = cada día)
+      - BACKUP_RETENTION=7     # Días de retención de backups
+    
+    volumes:
+      - minecraft_world:/data/world:ro  # Solo lectura para backup
+      - minecraft_mods:/data/mods:ro
+      - minecraft_config:/data/config:ro
+      - minecraft_backups:/backups
+    
+    command: >
+      sh -c "
+      apk add --no-cache tar gzip &&
+      while true; do
+        echo '[$(date)] Creando backup automático...'
+        tar -czf /backups/minecraft_backup_$(date +%Y%m%d_%H%M%S).tar.gz -C /data .
+        echo '[$(date)] Backup creado exitosamente'
+        find /backups -name '*.tar.gz' -mtime +$$BACKUP_RETENTION -delete
+        echo '[$(date)] Backups antiguos limpiados'
+        sleep $$BACKUP_INTERVAL
+      done"
+    
+    networks:
+      - minecraft-network
+
+  # === SERVICIO DE MONITOREO (OPCIONAL) ===
+  minecraft-monitor:
+    image: alpine:latest
+    container_name: minecraft-monitor
+    restart: unless-stopped
+    
+    environment:
+      - TZ=America/Mexico_City
+      - MONITOR_INTERVAL=60s   # Intervalo de monitoreo
+    
+    volumes:
+      - minecraft_logs:/logs:ro
+      - minecraft_backups:/monitoring
+    
+    command: >
+      sh -c "
+      apk add --no-cache curl &&
+      while true; do
+        echo '[$(date)] === ESTADO DEL SERVIDOR ===' > /monitoring/status.log
+        echo 'Timestamp: $(date)' >> /monitoring/status.log
+        echo 'Container Status: OK' >> /monitoring/status.log
+        if [ -f /logs/latest.log ]; then
+          echo 'Log Size: $(stat -f%z /logs/latest.log 2>/dev/null || stat -c%s /logs/latest.log)' >> /monitoring/status.log
+          echo 'Last Log Lines:' >> /monitoring/status.log
+          tail -5 /logs/latest.log >> /monitoring/status.log 2>/dev/null || echo 'No logs available' >> /monitoring/status.log
+        fi
+        echo '================================' >> /monitoring/status.log
+        sleep $$MONITOR_INTERVAL
+      done"
+    
+    networks:
+      - minecraft-network
+    
+    depends_on:
+      - minecraft-server
+
+# === CONFIGURACIÓN DE VOLÚMENES ===
+volumes:
+  # Mundo del servidor (datos más importantes)
+  minecraft_world:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/world
+  
+  # Mods del servidor
+  minecraft_mods:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/mods
+  
+  # Backups automáticos
+  minecraft_backups:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/backups
+  
+  # Configuraciones
+  minecraft_config:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/config
+  
+  # Logs del servidor
+  minecraft_logs:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./data/logs
+
+# === CONFIGURACIÓN DE REDES ===
+networks:
+  minecraft-network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16

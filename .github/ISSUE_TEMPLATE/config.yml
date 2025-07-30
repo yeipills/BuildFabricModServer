@@ -1,0 +1,25 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 📚 Documentación y Wiki
+    url: https://github.com/your-username/BuildFabricModServer/wiki
+    about: Consulta la documentación completa y guías detalladas
+  
+  - name: 💬 Discusiones de la Comunidad
+    url: https://github.com/your-username/BuildFabricModServer/discussions
+    about: Únete a las discusiones de la comunidad, comparte configuraciones y haz preguntas generales
+  
+  - name: 🚀 Guía de Inicio Rápido
+    url: https://github.com/your-username/BuildFabricModServer/blob/main/docs/QUICK_START.md
+    about: Comienza aquí si es tu primera vez usando este proyecto
+  
+  - name: 🐛 Problemas Conocidos
+    url: https://github.com/your-username/BuildFabricModServer/issues?q=is%3Aissue+is%3Aopen+label%3A%22known+issue%22
+    about: Revisa los problemas conocidos antes de reportar un bug
+  
+  - name: 🕸️ Fabric MC Official
+    url: https://fabricmc.net/
+    about: Documentación oficial de Fabric para preguntas específicas del mod loader
+  
+  - name: 🎮 Minecraft Official Support
+    url: https://help.minecraft.net/
+    about: Soporte oficial de Minecraft para problemas del juego base

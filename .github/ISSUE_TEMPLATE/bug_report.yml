@@ -1,0 +1,191 @@
+name: 🐛 Bug Report
+description: Reportar un error o problema con el servidor
+title: "[BUG] "
+labels: ["bug", "triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🐛 Gracias por reportar un bug!
+        
+        Por favor completa toda la información posible para ayudarnos a resolver el problema más rápidamente.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist Previo
+      description: Confirma que has revisado lo siguiente antes de reportar
+      options:
+        - label: He buscado en issues existentes para verificar que este bug no haya sido reportado
+          required: true
+        - label: He leído la documentación y guías de solución de problemas
+          required: true
+        - label: He intentado reproducir el problema en una instalación limpia
+          required: false
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: 📝 Descripción del Bug
+      description: Describe claramente qué está pasando
+      placeholder: "El servidor se cierra inesperadamente cuando..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: 🔄 Pasos para Reproducir
+      description: Pasos específicos para reproducir el problema
+      placeholder: |
+        1. Ejecutar `./install.sh`
+        2. Iniciar servidor con `./iniciador_optimizado_de_minecraft.sh`
+        3. Intentar conectarse desde cliente
+        4. Ver error...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: ✅ Comportamiento Esperado
+      description: Qué esperabas que pasara
+      placeholder: "El servidor debería iniciarse correctamente y permitir conexiones..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: ❌ Comportamiento Actual
+      description: Qué está pasando realmente
+      placeholder: "El servidor se cierra con error de memoria..."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: installation-method
+    attributes:
+      label: 🛠️ Método de Instalación
+      description: ¿Cómo instalaste el servidor?
+      options:
+        - Script de instalación automática (install.sh)
+        - Docker con docker-compose
+        - Docker con docker-run.sh
+        - Instalación manual
+        - Otro (especificar en descripción)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: architecture
+    attributes:
+      label: 🖥️ Arquitectura del Sistema
+      description: ¿Qué arquitectura estás usando?
+      options:
+        - x86_64 (AMD64)
+        - ARM64 (aarch64)
+        - ARM (32-bit)
+        - Otro (especificar en descripción)
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: 💻 Sistema Operativo
+      description: "Ejemplo: Ubuntu 22.04, Debian 11, Raspberry Pi OS"
+      placeholder: "Ubuntu 22.04 LTS"
+    validations:
+      required: true
+
+  - type: input
+    id: java-version
+    attributes:
+      label: ☕ Versión de Java
+      description: Resultado de `java -version`
+      placeholder: "openjdk version \"17.0.2\" 2022-01-18"
+    validations:
+      required: true
+
+  - type: input
+    id: minecraft-version
+    attributes:
+      label: 🎮 Versión de Minecraft
+      description: Versión que estás intentando usar
+      placeholder: "1.20.4"
+    validations:
+      required: true
+
+  - type: input
+    id: fabric-version
+    attributes:
+      label: 🕸️ Versión de Fabric
+      description: Versión del loader de Fabric
+      placeholder: "0.15.6"
+    validations:
+      required: true
+
+  - type: textarea
+    id: system-specs
+    attributes:
+      label: 🔧 Especificaciones del Sistema
+      description: Información relevante del hardware
+      placeholder: |
+        - RAM: 4GB
+        - CPU: 4 cores
+        - Almacenamiento: SSD 100GB
+        - Red: 100Mbps
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 📋 Logs Relevantes
+      description: Copia los logs de error (últimas 50 líneas)
+      placeholder: |
+        Pega aquí los logs del error. Puedes obtenerlos con:
+        - Instalación normal: `sudo journalctl -u minecraft-fabric -n 50`
+        - Docker: `./docker-run.sh logs | tail -50`
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: configuration
+    attributes:
+      label: ⚙️ Configuración Relevante
+      description: Configuraciones modificadas (server.properties, docker-compose.yml, etc.)
+      placeholder: "Si modificaste algún archivo de configuración, pega las partes relevantes aquí"
+      render: text
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: 📌 Contexto Adicional
+      description: Cualquier otra información que pueda ser útil
+      placeholder: |
+        - ¿El problema ocurre siempre o esporádicamente?
+        - ¿Hay algún patrón específico?
+        - ¿Qué has intentado para solucionarlo?
+        - Screenshots si es aplicable
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 📋 Confirmación Final
+      description: Confirma lo siguiente
+      options:
+        - label: He proporcionado toda la información relevante disponible
+          required: true
+        - label: Estoy dispuesto a proporcionar información adicional si es necesaria
+          required: true
+        - label: He verificado que este problema no es causado por mods de terceros
+          required: false

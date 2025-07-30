@@ -1,0 +1,190 @@
+# ==============================================================================
+# 🚀 GitIgnore para BuildFabricModServer
+# Mantiene el repositorio limpio con solo los archivos esenciales
+# ==============================================================================
+
+# === ARCHIVOS TEMPORALES Y LOGS ===
+*.log
+*.log.*
+logs/
+temp/
+tmp/
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+*~
+
+# === ARCHIVOS DEL SISTEMA ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# === DIRECTORIOS DE SERVIDOR MINECRAFT ===
+server/
+minecraft-server/
+world/
+world_*/
+*_world/
+backups/
+cache/
+crash-reports/
+saves/
+screenshots/
+resourcepacks/
+shaderpacks/
+config/
+mods/
+libraries/
+versions/
+
+# === ARCHIVOS JAR Y INSTALADORES ===
+*.jar
+fabric-installer-*.jar
+fabric-server-launch.jar
+minecraft_server.*.jar
+server.jar
+forge-*.jar
+optifine-*.jar
+
+# === CONFIGURACIONES DEL SERVIDOR ===
+server.properties
+eula.txt
+whitelist.json
+ops.json
+banned-players.json
+banned-ips.json
+usercache.json
+usernamecache.json
+
+# === ARCHIVOS DE DATOS ===
+*.dat
+*.dat_old
+*.dat_new
+session.lock
+uid.dat
+
+# === ARCHIVOS COMPRIMIDOS ===
+*.zip
+*.rar
+*.7z
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tgz
+
+# === ARCHIVOS DE DESARROLLO ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+nbproject/
+build/
+target/
+out/
+bin/
+*.class
+
+# === ARCHIVOS DE CONFIGURACIÓN LOCAL ===
+.env
+.env.local
+.env.*.local
+local_config.sh
+private_config.sh
+secrets.txt
+
+# === CONFIGURACIONES DE DESARROLLO ===
+.claude/
+PROJECT_STATUS.md
+*.local.json
+.vscode/settings.json
+.idea/workspace.xml
+
+# === ARCHIVOS ESPECÍFICOS DE MINECRAFT ===
+data/
+minecraft-data/
+fabric-server-launch.jar
+minecraft_server.*.jar
+
+# === DIRECTORIOS DE MONITOREO ===
+monitoring/
+stats/
+metrics/
+performance/
+
+# === ARCHIVOS DE BACKUP AUTOMÁTICO ===
+minecraft_backup_*.tar.gz
+backup_*.zip
+backup_*/
+auto_backup/
+
+# === ARCHIVOS DEL SISTEMA LINUX ===
+.bash_history
+.cache/
+.local/
+.config/
+.ssh/
+*.pid
+*.sock
+
+# === ARCHIVOS DE RENDIMIENTO ===
+*.hprof
+hs_err_pid*.log
+javacore.*.txt
+Snap.*.trc
+core.*
+
+# === ARCHIVOS DE RED ===
+*.pcap
+*.pcapng
+
+# === CERTIFICADOS Y CLAVES ===
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+keystore.*
+
+# === PERO MANTENER ESTOS ARCHIVOS IMPORTANTES ===
+!README.md
+!LICENSE
+!*.sh
+!docker-compose.yml
+!Dockerfile
+!requirements.txt
+!package.json
+!.gitignore
+!.github/
+!docs/
+!examples/
+!templates/
+!configs/server.properties.template
+!configs/whitelist.json.template
+
+# === EXCEPCIONES PARA CONFIGURACIONES TEMPLATE ===
+!templates/
+!examples/
+!configs/*.template
+!configs/*.example
+!default-configs/
+
+# === ARCHIVOS DE DOCUMENTACIÓN ===
+!*.md
+!docs/
+!*.txt
+!LICENSE*
+!CHANGELOG*
+!CONTRIBUTING*
+!CODE_OF_CONDUCT*

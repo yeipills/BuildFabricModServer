@@ -1,0 +1,191 @@
+# ============================================================================
+# 🚀 Configuración Optimizada para Servidor Minecraft Fabric
+# Versión: 2.0
+# Propósito: Configuración de alto rendimiento con comentarios detallados
+# ============================================================================
+
+# === CONFIGURACIÓN BÁSICA DEL SERVIDOR ===
+# Nombre del servidor (usado para identificación)
+server-name=Fabric Server Optimizado
+
+# Puerto donde escucha el servidor (25565 es el estándar)
+server-port=25565
+
+# IP específica para bind (déjalo vacío para todas las interfaces)
+server-ip=
+
+# === CONFIGURACIÓN DE JUGADORES ===
+# Número máximo de jugadores simultáneos
+max-players=20
+
+# Lista blanca activada (solo jugadores autorizados pueden entrar)
+white-list=false
+
+# Forzar lista blanca (expulsa jugadores no autorizados)
+enforce-whitelist=false
+
+# Permitir vuelo (útil para jugadores con mods)
+allow-flight=false
+
+# === CONFIGURACIÓN DEL MUNDO ===
+# Nombre del mundo principal
+level-name=world
+
+# Tipo de mundo (minecraft:normal, minecraft:flat, minecraft:large_biomes)
+level-type=minecraft:normal
+
+# Semilla del mundo (déjalo vacío para aleatoria)
+level-seed=
+
+# Configuraciones del generador (JSON para mundos personalizados)
+generator-settings={}
+
+# Generar estructuras (pueblos, mazmorras, etc.)
+generate-structures=true
+
+# === CONFIGURACIÓN DE GAMEPLAY ===
+# Modo de juego por defecto (survival, creative, adventure, spectator)
+gamemode=survival
+
+# Dificultad (peaceful, easy, normal, hard)
+difficulty=normal
+
+# Modo hardcore (muerte permanente)
+hardcore=false
+
+# PvP habilitado
+pvp=true
+
+# Forzar modo de juego por defecto
+force-gamemode=false
+
+# === CONFIGURACIÓN DE SPAWN ===
+# Radio de protección del spawn (bloques)
+spawn-protection=16
+
+# Permitir que los mobs aparezcan en el Nether
+allow-nether=true
+
+# Permitir que los mobs aparezcan naturalmente
+spawn-npcs=true
+spawn-animals=true
+spawn-monsters=true
+
+# === CONFIGURACIÓN DE RENDIMIENTO ===
+# Distancia de visualización (chunks) - CRÍTICO PARA RENDIMIENTO
+view-distance=10
+
+# Distancia de simulación (chunks) - Nuevo en 1.18+
+simulation-distance=10
+
+# Tamaño máximo del mundo (en bloques desde el centro)
+max-world-size=29999984
+
+# Umbral de compresión de red (bytes, -1 para deshabilitar)
+network-compression-threshold=256
+
+# Máximo tiempo de tick antes de watchdog (milisegundos)
+max-tick-time=60000
+
+# Usar transporte nativo optimizado
+use-native-transport=true
+
+# === CONFIGURACIÓN DE CHAT Y COMUNICACIÓN ===
+# Longitud máxima de mensajes de chat
+max-chat-message-length=256
+
+# Previsualización de chat habilitada
+previews-chat=false
+
+# Reportes de chat habilitados
+enable-chat-reports=true
+
+# === CONFIGURACIÓN DE RECURSOS ===
+# URL del pack de recursos del servidor (opcional)
+resource-pack=
+
+# SHA-1 del pack de recursos para verificación
+resource-pack-sha1=
+
+# Prompt personalizado para el pack de recursos
+resource-pack-prompt=
+
+# Requerir pack de recursos
+require-resource-pack=false
+
+# === CONFIGURACIÓN DE CONEXIÓN ===
+# Timeout de login del jugador (milisegundos)
+player-idle-timeout=0
+
+# Mensaje del día (MOTD) - Aparece en la lista de servidores
+motd=§6¡Servidor Minecraft Fabric Optimizado!\\n§eRendimiento y diversión garantizados
+
+# === CONFIGURACIÓN DE CONSULTAS Y RCON ===
+# Habilitar consultas del servidor (para herramientas externas)
+enable-query=false
+query.port=25565
+
+# Habilitar estado del servidor
+enable-status=true
+
+# RCON (administración remota) - ¡CAMBIAR CONTRASEÑA!
+enable-rcon=false
+rcon.port=25575
+rcon.password=CHANGE_THIS_PASSWORD
+
+# === CONFIGURACIÓN DE LOGGING ===
+# Logging de IPs de jugadores
+log-ips=true
+
+# === CONFIGURACIÓN AVANZADA DE RENDIMIENTO ===
+# Tick rate del servidor (no cambiar a menos que sepas lo que haces)
+# server-tick-rate=20
+
+# Configuración de chunks
+# max-chained-neighbor-updates=1000000
+
+# === CONFIGURACIÓN DE MUNDO Y BIOMAS ===
+# Permitir End
+allow-end=true
+
+# Generar biomas específicos
+# generate-biome-structures=true
+
+# === CONFIGURACIÓN DE MODS FABRIC ===
+# Configuraciones específicas para mods pueden ir aquí
+# Consulta la documentación de cada mod
+
+# === CONFIGURACIÓN DE SEGURIDAD ===
+# Prevenir proxy connections (anti-proxy)
+prevent-proxy-connections=false
+
+# Verificar nombres de usuario online
+online-mode=true
+
+# === CONFIGURACIÓN DE DEPURACIÓN ===
+# Habilitar debug del servidor (solo para desarrollo)
+debug=false
+
+# === CONFIGURACIÓN EXPERIMENTAL ===
+# Funciones experimentales habilitadas
+enable-command-block=false
+
+# === NOTAS DE OPTIMIZACIÓN ===
+# 1. view-distance: Reducir si hay lag (8-12 recomendado)
+# 2. simulation-distance: Mantener igual o menor que view-distance
+# 3. max-players: Ajustar según RAM disponible (1GB por cada 5-10 jugadores)
+# 4. network-compression-threshold: 256-512 para conexiones lentas, -1 para rápidas
+# 5. spawn-protection: 0 para deshabilitar, 16 es estándar
+# 6. max-tick-time: Aumentar si tienes muchos mods pesados
+
+# === CONFIGURACIÓN POR CANTIDAD DE RAM ===
+# 2GB RAM: max-players=10, view-distance=8
+# 4GB RAM: max-players=20, view-distance=10
+# 8GB RAM: max-players=50, view-distance=12
+# 16GB+ RAM: max-players=100+, view-distance=16
+
+# === INFORMACIÓN ADICIONAL ===
+# - Reiniciar el servidor después de cambios importantes
+# - Hacer backup antes de modificar configuraciones críticas  
+# - Monitorear TPS (ticks per second) para detectar lag
+# - Usar /forge tps o herramientas de monitoreo para diagnosticar
